@@ -1,0 +1,4 @@
+*.mdx
+*.mdx.db
+.vscode
+__pycache__

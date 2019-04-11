@@ -1,0 +1,133 @@
+<!doctype html>
+
+<head>
+  <script src="/static/jquery.min.js"></script>
+  <link rel="stylesheet" href="/static/bing-dict.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+  <script src="//cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+  <title>英文文章阅读器</title>
+</head>
+
+<body>
+  <div class="ui container">
+    <div id="pre-processed">
+      <h1>你的文章</h1>
+      <form class="ui form"><textarea name="passage" id="passage" placeholder="在这里输入你的英文文档，然后点击下面的阅读按钮"
+          rows="30"></textarea></form>
+      <br>
+      <button class="ui button" id="get_annotations">
+        阅读
+      </button>
+    </div>
+
+    <div id="post-processed" style="display:none;">
+      <div class="ui grid">
+        <div class="row">
+          <div class="ui column" style="width: 75%;">
+            <h1>你的文章</h1>
+            <div class="ui segment" style="height: 30rem; overflow:auto;">
+              <div id="post-passage"></div>
+            </div>
+          </div>
+          <div class="ui column" style="width: 25%">
+            <h1>单词释义</h1>
+            <div class="ui text segment" style="height: 30rem; overflow:auto;">
+              <div id="word-exp">还没有选中单词，双击单词即可翻译</div>
+              <div id="word-example-sentence"></div>
+            </div>
+          </div>
+        </div>
+        <div class="row" style="display:none;" id='translation-row'>
+          <div class="ui column">
+            <div class="ui segment" style="height: 30rem; overflow:auto;">
+              <div id="translation-passage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <button class="ui button" onclick="window.location.reload();">再来一篇</button>
+      <button class="ui button" id="translate">翻译全文</button>
+      <h1>单词本</h1>
+      <div id="annotations" class="ui segment"></div>
+    </div>
+  </div>
+  <script>
+
+    function show(sec, flg) {
+      if (flg === true) {
+        $(sec).removeAttr("style");
+      } else {
+        $(sec).attr("style", "display:none;");
+      }
+    }
+    $("#translate").click(function () {
+      console.log("translate full text");
+      if ($(this).text() == "翻译全文") {
+        this_ = $(this);
+        $(this).text("翻译中…");
+        text = $("#passage").val();
+        // console.log(text);
+        $.post("/translate", { "passage": text },
+          function (data, textStatus, jqXHR) {
+            this_.text("隐藏译文");
+            show("#translation-row", true);
+            t2 = data.replace(/\n/g, "<br>");
+            $("#translation-passage").html(t2);
+          });
+        
+      } else if($(this).text() == "隐藏译文") {
+        $(this).text("翻译全文");
+        show("#translation-row", false);
+      }
+
+    });
+    $("#get_annotations").click(function () {
+      text = $("#passage").val();
+      // console.log(text);
+      $.post("/wordlist", { "passage": text },
+        function (data, textStatus, jqXHR) {
+          show("#pre-processed", false);
+          show("#post-processed", true);
+          t2 = text.replace(/\n/g, "<br>");
+          $("#post-passage").html(t2);
+          $("#annotations").html(data);
+        });
+
+    });
+    function alignWords(n, t, i) {
+      var u = document.getElementsByName(t), r; if (u != null) for (r = 0; r < u.length; r++)u[r].onmouseout || (u[r].onmouseout = function () { alignWords(this, t, 0) }), i ? (u[r].style.color = "white", u[r].style.backgroundColor = "#04c") : (u[r].style.color = "", u[r].style.backgroundColor = "")
+    }
+
+    $(document).ready(function () {
+
+
+      /* set hand cursor to let know the user that this area is clickable */
+      var p = $('#post-passage');
+      p.css({ cursor: 'pointer' });
+
+      /* doubleclick event working with ranges */
+      p.dblclick(function (e) {
+        var selection = window.getSelection() || document.getSelection() || document.selection.createRange();
+        var word = $.trim(selection.toString());
+        if (word != '') {
+          $.get("/word", { "q": word.toLowerCase() },
+            function (data, textStatus, jqXHR) {
+              $('#word-exp').html(data);
+              $('#word-example-sentence').html("");
+            });
+          $.get("/word-example-sentence", { "q": word },
+            function (data, textStatus, jqXHR) {
+              $('#word-example-sentence').html(data);
+            });
+
+        }
+        /* use this if firefox: selection.collapse(selection.anchorNode, selection.anchorOffset); */
+
+        e.stopPropagation();
+      });
+    });
+
+  </script>
+</body>
