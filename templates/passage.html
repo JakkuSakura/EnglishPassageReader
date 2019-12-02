@@ -76,8 +76,8 @@
             t2 = data.replace(/\n/g, "<br>");
             $("#translation-passage").html(t2);
           });
-        
-      } else if($(this).text() == "隐藏译文") {
+
+      } else if ($(this).text() == "隐藏译文") {
         $(this).text("翻译全文");
         show("#translation-row", false);
       }
@@ -102,31 +102,53 @@
 
     $(document).ready(function () {
 
+      {
+        /* set hand cursor to let know the user that this area is clickable */
+        var p = $('#post-passage');
+        p.css({ cursor: 'pointer' });
 
-      /* set hand cursor to let know the user that this area is clickable */
-      var p = $('#post-passage');
-      p.css({ cursor: 'pointer' });
+        /* doubleclick event working with ranges */
+        p.dblclick(function (e) {
+          var selection = window.getSelection() || document.getSelection() || document.selection.createRange();
+          var word = $.trim(selection.toString());
+          if (word != '') {
+            $.get("/word", { "q": word.toLowerCase() },
+              function (data, textStatus, jqXHR) {
+                $('#word-exp').html(data);
+                $('#word-example-sentence').html("");
+              });
+            $.get("/word-example-sentence", { "q": word },
+              function (data, textStatus, jqXHR) {
+                $('#word-example-sentence').html(data);
+              });
 
-      /* doubleclick event working with ranges */
-      p.dblclick(function (e) {
-        var selection = window.getSelection() || document.getSelection() || document.selection.createRange();
-        var word = $.trim(selection.toString());
-        if (word != '') {
-          $.get("/word", { "q": word.toLowerCase() },
-            function (data, textStatus, jqXHR) {
-              $('#word-exp').html(data);
-              $('#word-example-sentence').html("");
-            });
-          $.get("/word-example-sentence", { "q": word },
-            function (data, textStatus, jqXHR) {
-              $('#word-example-sentence').html(data);
-            });
+          }
+          /* use this if firefox: selection.collapse(selection.anchorNode, selection.anchorOffset); */
 
-        }
-        /* use this if firefox: selection.collapse(selection.anchorNode, selection.anchorOffset); */
+          e.stopPropagation();
+        });
+      }
+      {
 
-        e.stopPropagation();
-      });
+        /* set hand cursor to let know the user that this area is clickable */
+        var p = $('#annotations');
+        p.css({ cursor: 'pointer' });
+
+        /* doubleclick event working with ranges */
+        p.dblclick(function (e) {
+          var selection = window.getSelection() || document.getSelection() || document.selection.createRange();
+          var word = $.trim(selection.toString());
+          if (word != '') {
+            $.post("/ignore", { "w": word.toLowerCase() },
+              function (data, textStatus, jqXHR) {
+                console.log('ignored', word);
+              });
+          }
+          /* use this if firefox: selection.collapse(selection.anchorNode, selection.anchorOffset); */
+
+          e.stopPropagation();
+        });
+      }
     });
 
   </script>

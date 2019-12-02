@@ -6,6 +6,12 @@ from bs4 import BeautifulSoup
 app = Flask(__name__)
 
 
+ignored_words = []
+with open("ignored_words.txt", 'r') as f:
+    for e in f:
+        ignored_words.append(e.strip())
+print('ignored', len(ignored_words), 'words')
+
 @app.route('/')
 def main_page():
     return render_template("passage.html")
@@ -44,13 +50,23 @@ def example_sentence():
 def wordlist():
     # print(request.form)
     psg = request.form['passage']
-    li = get_wordlist(psg)
+    li = get_wordlist(psg, ignored_words)
     ss = []
     for e in li:
         ss.append(e[1])
     return '<div>共有{}生词</div>'.format(len(ss))+''.join(ss)
 
-    
+
+@app.route('/ignore', methods=['POST'])
+def ignore_word():
+    word = request.form['w']
+    ignored_words.append(word)
+    with open("ignored_words.txt", "a") as f:
+        f.write(word)
+        f.write('\n')
+    return ""
+
+
 @app.route('/translate', methods=['POST'])
 def translate():
     import baidu

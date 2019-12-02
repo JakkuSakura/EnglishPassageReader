@@ -1,4 +1,5 @@
-# /bin/python3
+#!/bin/python3
+# coding: utf-8
 import requests as rq
 import sys
 import re
@@ -28,12 +29,16 @@ def split_sentences(passage):
     return l
 
 
-def get_wordlist(sen):
+def get_wordlist(sen, ignored):
+    print(ignored)
     words = split_words(sen)
     pairs = []
     for e in words:
+        if e in ignored:
+            # print('ignored', e)
+            continue
         exp = get_exp(e)
-        if not exp or '(中' in exp[0]:
+        if not exp:
             continue
         pairs.append((e, exp[0]))
     return pairs

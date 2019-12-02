@@ -1,0 +1,9 @@
+\contentsline {section}{摘要}{1}{Doc-Start}
+\contentsline {section}{\numberline {1}使用方法}{3}{section.1}
+\contentsline {section}{\numberline {2}Python 环境}{3}{section.2}
+\contentsline {section}{\numberline {3}Python Web环境}{3}{section.3}
+\contentsline {section}{\numberline {4}全文翻译}{3}{section.4}
+\contentsline {section}{\numberline {5}前端UI库}{4}{section.5}
+\contentsline {section}{\numberline {6}MDX文件格式}{4}{section.6}
+\contentsline {section}{\numberline {7}词典文件}{5}{section.7}
+\contentsline {section}{\numberline {8}获取例句}{5}{section.8}
